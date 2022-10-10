@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Игра \"Пятнашки\"</string>
+    <string name="bt_name">bt</string>
+    <string name="in_game">Игра началась!</string>
+    <string name="congrats">Поздравляем! Вы выиграли!</string>
+    <string name="clear_and_start_new_game">Начать новую игру</string>
+    <string name="step_number">Количество ходов: </string>
+    <string name="winner_name">Введите своё имя</string>
+    <string name="winner_name_list">Аллея славы</string>
+    <string name="clear_glory_list">Очистить аллею славы</string>
+    <string name="logout">Покинуть игру</string>
+    <string name="header1">Имя</string>
+    <string name="header2">Ходы</string>
+    <string name="header3">Дата</string>
+</resources>

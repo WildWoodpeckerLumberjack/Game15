@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/grid_style"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <EditText
+        android:id="@+id/winner_name_edit"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:background="#efe5b2"
+        android:gravity="center"
+        android:inputType="textCapSentences"
+        android:maxLines="1"
+        android:maxLength="25"
+
+        android:hint="@string/winner_name"
+        android:minWidth="32dp"
+        android:textColor="@color/black"
+        android:textColorHint="#827717"
+        android:textSize="20sp"
+        android:textStyle="bold">
+        <requestFocus />
+    </EditText>
+
+</FrameLayout>
+
+    <!--  android:imeOptions="actionDone"-->
