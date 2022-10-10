@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 cheat mode on :)
                 fillMatrix(matrix);
                 showMatrix();
+                Для тестирования
 */
                 return true;
             default:

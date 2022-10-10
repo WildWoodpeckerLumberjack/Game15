@@ -6,9 +6,6 @@ import androidx.room.PrimaryKey;
 @Entity
 public class Player {
 
-/*    public Player() {
-    }*/
-
     public Player(String name, int numberOfSteps, long gameDate) {
         this._id = 0;
         this.name = name;
