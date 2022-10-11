@@ -30,10 +30,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    Boolean inGame;
-    Integer[][] matrix = new Integer[4][4];
-    Integer[][] target = new Integer[4][4];
-    int stepNumber;
+    Boolean inGame;   // Флаг начатой игры
+    Integer[][] matrix = new Integer[4][4]; // Массив текущего положения костяшек
+    Integer[][] target = new Integer[4][4]; // Массив целевого расположения костяшек
+    int stepNumber; // Количество ходов текущей игры
 
     Toolbar toolbar;
 
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     GridView gridView;
     GridAdapter gridAdapter;
 
+    // Обработчик нажатия клавиш при вводе имени победителя
     View.OnKeyListener gloryListener = new View.OnKeyListener() {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -65,18 +66,19 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Обработчик событий нажатия иконок в тулбаре
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_new_game:
+            case R.id.action_new_game: // Начать игру заново
                 setBeginState();
                 showMatrix();
                 return true;
-            case R.id.action_clear_winners:
+            case R.id.action_clear_winners: // Очистить доску почета
                 playerDao.clear();
                 fillWinnersList();
                 return true;
-            case R.id.action_logout:
+            case R.id.action_logout: // Выйти из игры
                 finishAndRemoveTask();
 /*
                 cheat mode on :)
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Обработчик событий нажатия на костяшки
     GridView.OnItemClickListener gridItemClick = (parent, view, position, id) -> {
         if (inGame) {
         int btX;
@@ -101,12 +104,14 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Отрисовка кастомного макета тулбара
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
+    // Заполнение массива положения костяшек по порядку
     public void fillMatrix(Integer[][] matrix) {
         int n = 1 ;
         for (int y = 0; y < 4; y++) {
@@ -117,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         matrix[3][3] = 0;
     }
 
+    // Сохранение текущей игры для использования при повороте экрана
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putSerializable("savedMatrix", matrix);
@@ -125,16 +131,19 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    // Чтение данных из БД для заполнения доски почета
     public void getDataFromDB(){
         db =  Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database").allowMainThreadQueries().build();
         playerDao = db.playerDao();
     }
 
+    // Инициализация объектов доски почета
     public void initializeWinnerFrame(){
         winnerFrame = findViewById(R.id.winner_frame);
         materialCardView = findViewById(R.id.material_card);
     }
 
+    // Отрисовка макета доски почета (либо список победителей, либо ввод имени нового победителя)
     public void fillWinnerFrame(@LayoutRes int layout){
         winnerFrame.removeAllViews();
         winnerFrame = (FrameLayout) LayoutInflater.from(getApplicationContext()).inflate(layout, materialCardView, true);
@@ -143,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Заполнение списка победителей
     public void fillWinnersList() {
         cursor = playerDao.getAll();
         SimpleCursorAdapter listAdapter = new SimpleCursorAdapter(this,
@@ -155,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
         gloryListView.setAdapter(listAdapter);
     }
 
+    // Вычисление высоты служебных панелей (для вычисления размера костяшки)
     public int getAllBarsHeight() { //Тут надо поразбираться
         int result = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -176,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    // Запуск приложения
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -192,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
         fillWinnersList();
         fillMatrix(target);
 
+        // Заполнение массива изображений костяшек
         gridImages = new Integer[16];
         for (int i = 0; i < 16; i++){
             String resName = "tree" + (i + 1);
@@ -209,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
 
         int screenSize = 0;
 
+        // Вычисление размера экрана (для вычисления размера костяшки)
         switch (Resources.getSystem().getConfiguration().orientation) {
             case Configuration.ORIENTATION_PORTRAIT:
                 screenSize = Resources.getSystem().getDisplayMetrics().widthPixels-10;
@@ -227,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
         statusText = findViewById(R.id.tv1);
 
+        // Считывание текущей игры в случае если событие вызывается после поворота экрана
         if (savedInstanceState != null) {
               matrix = (Integer[][]) savedInstanceState.getSerializable("savedMatrix");
               stepNumber = savedInstanceState.getInt("savedSteps");
@@ -236,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //Отображение текущей игровой ситуации после хода игрока и проверка на окончание игры
     public void showMatrix(){
         gridAdapter.setGridItems(gridToLine(matrix));
         gridAdapter.notifyDataSetChanged();
@@ -248,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         } else statusText.setText(R.string.in_game);
     }
 
-
+    // Первоначальное заполнение массива костяшек и 500 случайных ходов для запутывания противника :)
     public void setBeginState() {
         fillMatrix(matrix);
         for (int i = 0; i < 501; i++) {
@@ -259,14 +275,15 @@ public class MainActivity extends AppCompatActivity {
         statusText.setText(R.string.in_game);
     }
 
+    // Вычисление списка возможных перемещений костяшки при нажатии (чтоб не выползти за пределы игрового поля)
     public List<Integer[]> possibleCoordinates(int y, int x) {
-        List<Integer[]> possibleCoordinates = new ArrayList<>();
-        possibleCoordinates.add(new Integer[]{y, x + 1});
-        possibleCoordinates.add(new Integer[]{y, x - 1});
-        possibleCoordinates.add(new Integer[]{y + 1, x});
-        possibleCoordinates.add(new Integer[]{y - 1, x});
+        List<Integer[]> possibleCoordinates = new ArrayList<>(); // Создали пустой список
+        possibleCoordinates.add(new Integer[]{y, x + 1}); //
+        possibleCoordinates.add(new Integer[]{y, x - 1}); // Заполнили список всеми
+        possibleCoordinates.add(new Integer[]{y + 1, x}); // возможными вариантами хода
+        possibleCoordinates.add(new Integer[]{y - 1, x}); //
         List<Integer[]> result = new ArrayList<>();
-        for (Integer[] coordinates : possibleCoordinates) {
+        for (Integer[] coordinates : possibleCoordinates) { // Вычленили те ходы, которые не выводят за пределы поля
             if (!(coordinates[0] < 0 | coordinates[0] > 3) & !(coordinates[1] < 0 | coordinates[1] > 3)) {
                 result.add(coordinates);
             }
@@ -274,20 +291,22 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    // Ход игрока
     public void playersStep(int y, int x) {
         Integer temp;
-        List<Integer[]> possibleCoordinates = possibleCoordinates(y, x);
+        List<Integer[]> possibleCoordinates = possibleCoordinates(y, x); // Получили возможные ходы выбранной игроком костяшки
         for (Integer[] coordinates : possibleCoordinates) {
-            if (matrix[coordinates[0]][coordinates[1]] == 0) {
+            if (matrix[coordinates[0]][coordinates[1]] == 0) { // Нашли среди них пустой слот
                 temp = matrix[y][x];
                 matrix[y][x] = matrix[coordinates[0]][coordinates[1]];
-                matrix[coordinates[0]][coordinates[1]] = temp;
+                matrix[coordinates[0]][coordinates[1]] = temp; // Переместили выбранную костяшку в пустой слот
                 stepNumber++;
                 break;
             }
         }
     }
 
+    // Перевод двумерного массива костяшек в одномерный для удобства сравнения массивов. Вообще, конечно, стоит перевести целевой массив в константы, чтоб не считатть его лишний раз
     public Integer[] gridToLine(Integer[][] matrix) {
         Integer[] result = new Integer[16];
         int counter;
@@ -300,17 +319,18 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    // Процедура выполнения слуайного хода для первоначальной расстановки
     public void randomStep() {
         List<Integer> temp = new ArrayList<>(Arrays.asList(gridToLine(matrix)));
         int randomNum;
-        int pos = temp.indexOf(0);
-        int y = pos / 4;
-        int x = pos % 4;
-        List<Integer[]> possibleCoordinates = possibleCoordinates(y, x);
-        randomNum = ((int) (Math.random() * possibleCoordinates.size()));
+        int pos = temp.indexOf(0); // Получили позицию пустого поля
+        int y = pos / 4; // Получили координаты
+        int x = pos % 4; // пустого поля
+        List<Integer[]> possibleCoordinates = possibleCoordinates(y, x); // Получили список возможных вариантов хода
+        randomNum = ((int) (Math.random() * possibleCoordinates.size())); // Выбрали случайный ход
         int targetY = possibleCoordinates.get(randomNum)[0];
         int targetX = possibleCoordinates.get(randomNum)[1];
         matrix[y][x] = matrix[targetY][targetX];
-        matrix[targetY][targetX] = 0;
+        matrix[targetY][targetX] = 0; // Передвинули костяшку
     }
 }

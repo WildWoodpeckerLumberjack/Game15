@@ -12,6 +12,7 @@ public class GridAdapter extends BaseAdapter {
 
     private final Context mContext;
 
+    // Заполнение масива изображений костяшек
     public void setGridImages(Integer[] gridImages) {
         this.gridImages = gridImages;
     }
@@ -45,6 +46,7 @@ public class GridAdapter extends BaseAdapter {
         return position;
     }
 
+    // Отрисовка текущей костяшки
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -61,7 +63,7 @@ public class GridAdapter extends BaseAdapter {
         layoutParams.width = cellSize;
         convertView.setLayoutParams(layoutParams);
 
-        ((TextView) convertView.findViewById(R.id.item_text)).setText(gridItems[position] == 0 ? " " : gridItems[position].toString());
+        ((TextView) convertView.findViewById(R.id.item_text)).setText(gridItems[position] == 0 ? " " : gridItems[position].toString()); // Отображение номера костяшки
         ((ImageView) convertView.findViewById(R.id.item_image)).setImageResource(gridImages[imageNum]);
 
         return convertView;
