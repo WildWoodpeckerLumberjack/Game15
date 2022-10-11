@@ -3,8 +3,10 @@ package com.example.game15;
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 import androidx.room.Room;
 
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -34,6 +36,38 @@ public class MainActivity extends AppCompatActivity {
     Integer[][] matrix = new Integer[4][4]; // Массив текущего положения костяшек
     Integer[][] target = new Integer[4][4]; // Массив целевого расположения костяшек
     int stepNumber; // Количество ходов текущей игры
+
+    // Обработчик положительного результата диалога перезапуска игры
+    DialogInterface.OnClickListener gameRenewListener = new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+            setBeginState();
+            showMatrix();
+            dialog.cancel();
+        }
+    };
+
+    // Обработчик положительного результата диалога очистки доски почета
+    DialogInterface.OnClickListener clearGloryListener = new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+            playerDao.clear();
+            fillWinnersList();
+            dialog.cancel();
+        }
+    };
+
+    // Обработчик положительного результата диалога выхода из игры
+    DialogInterface.OnClickListener quitGameListener = new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+            finishAndRemoveTask();
+            dialog.cancel();
+        }
+    };
+
+    // Создаем диалоговые окна для подтверждения действий кнопок тулбара
+    MyDialogFragment gameRenewDialogFragment = new MyDialogFragment("Начать игру заново?", gameRenewListener);
+    MyDialogFragment clearGloryDialogFragment = new MyDialogFragment("Очистить доску почета?", clearGloryListener);
+    MyDialogFragment quitGameDialogFragment = new MyDialogFragment("Покинуть игру?", quitGameListener);
+    FragmentManager manager = getSupportFragmentManager();
 
     Toolbar toolbar;
 
@@ -71,21 +105,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_new_game: // Начать игру заново
-                setBeginState();
-                showMatrix();
+                gameRenewDialogFragment.show(manager, "gameRenewDialogFragment"); // Вызов диалога перезапуска игры
                 return true;
             case R.id.action_clear_winners: // Очистить доску почета
-                playerDao.clear();
-                fillWinnersList();
+                clearGloryDialogFragment.show(manager, "clearGloryDialogFragment"); // Вызов диалога очистки доски почета
                 return true;
             case R.id.action_logout: // Выйти из игры
-                finishAndRemoveTask();
-/*
-                cheat mode on :)
-                fillMatrix(matrix);
-                showMatrix();
-                Для тестирования
-*/
+                quitGameDialogFragment.show(manager, "quitGameDialogFragment"); // Вызов диалога выхода из игры
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -193,6 +219,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Запрещаем закрытие диалогов по нажатию в произвольном месте экрана (почему-то setCancelable в классе диалога не срабатывает)
+        gameRenewDialogFragment.setCancelable(false);
+        clearGloryDialogFragment.setCancelable(false);
+        quitGameDialogFragment.setCancelable(false);
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -217,12 +248,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
         stepNumberText = findViewById(R.id.step_numbers);
 
-        int screenSize = 0;
-
         // Вычисление размера экрана (для вычисления размера костяшки)
+        int screenSize = 0;
         switch (Resources.getSystem().getConfiguration().orientation) {
             case Configuration.ORIENTATION_PORTRAIT:
                 screenSize = Resources.getSystem().getDisplayMetrics().widthPixels-10;
@@ -248,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
               inGame = savedInstanceState.getBoolean("savedInGameStatus");
         } else setBeginState();
         showMatrix();
-
     }
 
     //Отображение текущей игровой ситуации после хода игрока и проверка на окончание игры
